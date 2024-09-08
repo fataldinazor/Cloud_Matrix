@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign-Up</title>
+  </head>
+  <body>
+    <%!-include('header.ejs')%> 
+
+    <h2>User Sign-Up</h2>
+    <%if(errors && errors.length>0){%>
+    <ul>
+      <%errors.forEach(error=>{%>
+      <li><%=error.msg%></li>
+      <%})%>
+    </ul>
+    <%}%>
+
+    <form action="/sign-up" method="POST">
+      <label for="fname"
+        >First Name:
+        <input type="text" id="fname" name="fname" required />
+      </label>
+      <label for="lname"
+        >Last Name:
+        <input type="text" id="lname" name="lname" />
+      </label>
+      <label for="username"
+        >Username
+        <input type="text" id="username" name="username" required />
+      </label>
+      <label for="password"
+        >Password:
+        <input type="text" id="password" name="password" required />
+      </label>
+      <label for="confirmPassword">Confirm Password:
+        <input
+          type="text"
+          id="confirmPassword"
+          name="confirmPassword"
+          required
+        />
+      </label>
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
