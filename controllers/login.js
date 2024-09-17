@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const prisma = require("./prisma");
 
 passport.use(
-  LocalStrategy(async (username, password, done) => {
+  new LocalStrategy(async (username, password, done) => {
     try {
       const user = await prisma.user.findUnique({
         where: { username },
@@ -12,7 +12,7 @@ passport.use(
       if (!user) {
         return done(null, false, { message: `Incorrect Username` });
       }
-      const isMatch = bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return done(null, false, { message: `Incorrect Password` });
       }
@@ -41,7 +41,7 @@ passport.deserializeUser(async (id, done) => {
 // get login form
 const loginGet = (req, res) => {
   if (req.user) {
-    redirect(`/users/${req.user.id}`);
+    res.redirect(`/users/${req.user.id}`);
   } else {
     res.render("login", {
       errors: [],
@@ -50,7 +50,7 @@ const loginGet = (req, res) => {
 };
 
 // POST login form and authenticate user
-const loginPost = (req, res) => {
+const loginPost = (req, res, next) => {
   passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/log-in",

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%=user.username%></title>
+  </head>
+  <body>
+    <%-include("header.ejs")%>
+    <div class="container">
+      <h2><%=user.fname%> <%=user.lname%></h2>
+      <div class="createFolderForm">
+        <%if(errors){%>
+        <ul>
+          <%errors.forEach(error=>{%>
+          <li><%=error.msg%></li>
+          <%})%>
+        </ul>
+        <%}%>
+        <form action="/users/<%=user.id%>/create-folder" method="POST">
+          <label for="folderName"
+            >Folder Name:
+            <input
+              type="text"
+              id="folderName"
+              name="folderName"
+              placeholder="Enter Folder Name"
+            />
+          </label>
+          <label for="private"
+            >Want a Private Folder
+            <input type="checkbox" id="private" name="private" value="" />
+          </label>
+          <button type="submit">Create New Folder</button>
+        </form>
+      </div>
+      <div class="userFolderContainer">
+        <h4>Folders</h4>
+        <%if(folders){%>
+        <ul>
+          <%folders.forEach(folder=>{%>
+          <li>
+            <a href="/users/<%=user.id%>/<%=folder.id%>"><%=folder.name%></a>
+
+          </li>
+          <%})%>
+        </ul>
+        <%}%>
+      </div>
+    </div>
+  </body>
+</html>

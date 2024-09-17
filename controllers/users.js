@@ -1,12 +1,99 @@
-const allUsers=(req, res)=>{
+const prisma = require("./prisma");
+const { body, validationResult } = require("express-validator");
 
-}
+const uniqueFolderName = body("folderName").custom(async (value, {req}) => {
+  try {
+    const user_id = parseInt(req.params.user_id);
+    const folderName = await prisma.folder.findUnique({
+      where: {
+        userId: user_id,
+        name: value,
+      },
+    });
+    if (folderName) {
+      throw new Error("Folder name exists");
+    }
+    return true
+  } catch (error) {
+    console.log(error);
+    throw new Error(error.message || "Sever Error")
+  }
+});
 
-const userGet=(req, res)=>{
-    const user_id= req.user.id;
-}
+const allUsers = async (req, res) => {
+  const allUsers = await prisma.user.findMany();
+  res.render("allUsers", {
+    allUsers: allUsers,
+  });
+};
 
-module.exports={
-    allUsers,
-    userGet
-}
+const userGet = async (req, res) => {
+  const user_id = parseInt(req.params.user_id);
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        id: user_id,
+      },
+    });
+    const folders = await prisma.folder.findMany({
+      where: {
+        userId: user_id,
+      },
+    });
+    if (!user) {
+      return res.status(404).send("User Not Found");
+    }
+    res.render("user", {
+      user: user,
+      folders: folders,
+      errors: [],
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+const userCreateFolderPost = [
+  uniqueFolderName,
+  async (req, res) => {
+    const errors = validationResult(req);
+    const user_id = parseInt(req.params.user_id);
+
+    const user = await prisma.user.findUnique({
+      where: { id: user_id },
+    });
+    const folders = await prisma.folder.findMany({
+      where: { userId: user_id },
+    });
+    if (!errors.isEmpty()) {
+      return res.status(400).render("user", {
+        user: user,
+        folders: folders,
+        errors: errors.array(),
+      });
+    }
+    let { folderName, private } = req.body;
+    private = private === true ? true : false;
+    console.log(folderName, private, user_id);
+    try {
+      await prisma.folder.create({
+        data: {
+          name: folderName,
+          userId: user_id,
+          private: private,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(400).send("Server Error");
+    }
+    res.redirect(`/users/${user_id}`);
+  },
+];
+
+module.exports = {
+  allUsers,
+  userGet,
+  userCreateFolderPost,
+};

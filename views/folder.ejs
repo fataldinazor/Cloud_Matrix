@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder</title>
+</head>
+<body>
+    <%-include("header.ejs")%>
+    <div class="folderContainer">
+        <h2>Folder: <%=folder.name %></h2>
+        <div class="fileContainer">
+            <%files.forEach(file=>{%>
+                <div class="fileItem">
+                    <a href="/users/<%=user.id%>/<%=folder.id%>/<%=file.id%>"><%=file.name %></a>
+                </div>
+            <%})%>
+        </div>
+        <form action="/users/<%=user.id%>/<%=folder.id%>/upload" method="POST" enctype="multipart/form-data">
+            <label for="fileUpload">Upload File:</label>
+            <input type="file" id="fileUpload" name="user<%= user.id %>File" accept=".txt,.pdf,.png,.docx,.jpg, .jpeg" multiple>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+</body>
+</html>

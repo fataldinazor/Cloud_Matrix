@@ -1,7 +1,11 @@
 <header>
     <h2>Website Name</h2>
     <ul>
-        <li><a href="/sign-up">Sign-Up</a></li>
-        <li><a href="/log-in">Log-In</a></li>
+       <% if(!user){ %>
+            <li><a href="/sign-up">Sign-Up</a></li>
+            <li><a href="/log-in">Log-In</a></li>
+        <%}else{%>
+            <li><a href="/logout">Log-Out</a></li>
+        <%}%>
     </ul>
 </header>

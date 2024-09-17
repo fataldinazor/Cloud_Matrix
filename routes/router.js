@@ -4,6 +4,7 @@ const homepageController = require("../controllers/homepage.js");
 const signupController = require("../controllers/signup.js");
 const loginController = require("../controllers/login.js");
 const usersController = require("../controllers/users.js");
+const folderController = require("../controllers/folders.js");
 
 router.get("/", homepageController);
 
@@ -13,18 +14,16 @@ router.post("/sign-up", signupController.signupPost);
 
 //log-in User 
 router.get("/log-in", loginController.loginGet);
-router.post("/log-in", signupController.loginPost);
+router.post("/log-in", loginController.loginPost);
 
 //users
-// router.get("users", usersController.allUsers);
-// router.get("users/:user_id", usersController.getUser);
+router.get("/users", usersController.allUsers);
+router.get("/users/:user_id", usersController.userGet);
+router.post("/users/:user_id/create-folder", usersController.userCreateFolderPost)
 
+//folder
+router.get("/users/:user_id/:folder_id", folderController.getFolder)
+router.post("/users/:user_id/:folder_id/upload", folderController.UploadFilePost);
 
 //logout User
-app.get("/logout", (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-  });
-  res.redirect("/");
-});
 module.exports = router;
