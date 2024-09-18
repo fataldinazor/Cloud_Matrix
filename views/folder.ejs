@@ -1,26 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Folder</title>
-</head>
-<body>
+  </head>
+  <body class="bg-gray-100">
     <%-include("header.ejs")%>
-    <div class="folderContainer">
-        <h2>Folder: <%=folder.name %></h2>
-        <div class="fileContainer">
-            <%files.forEach(file=>{%>
-                <div class="fileItem">
-                    <a href="/users/<%=user.id%>/<%=folder.id%>/<%=file.id%>"><%=file.name %></a>
-                </div>
-            <%})%>
+
+    <div class="container mx-auto p-6">
+      <h2 class="text-3xl font-semibold text-gray-800 mb-4">
+        Folder: <%= folder.name %>
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% files.forEach(file => { %>
+        <div class="bg-white p-4 rounded-lg shadow-lg">
+          <p class="font-medium text-lg text-gray-700"><%= file.name %></p>
+          <li class="text-gray-500 text-sm">
+            <%= new Date(file.createdAt).toLocaleDateString('en-GB', { day:
+            '2-digit', month: '2-digit', year: 'numeric' }) %>
+          </li>
+          <a
+            href="/users/<%=user.id%>/<%=folder.id%>/<%=file.id%>/download"
+            class="mt-2 inline-block bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
+            >Download</a
+          >
         </div>
-        <form action="/users/<%=user.id%>/<%=folder.id%>/upload" method="POST" enctype="multipart/form-data">
-            <label for="fileUpload">Upload File:</label>
-            <input type="file" id="fileUpload" name="user<%= user.id %>File" accept=".txt,.pdf,.png,.docx,.jpg, .jpeg" multiple>
-            <button type="submit">Upload</button>
+        <% }) %>
+      </div>
+
+      <div id="formDiv" class="mt-6 bg-white p-6 rounded-lg shadow-lg">
+        <form
+          action="/users/<%=user.id%>/<%=folder.id%>/upload"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <div class="mb-4">
+            <label
+              for="fileUpload"
+              class="block text-lg font-medium text-gray-700"
+              >Upload File:</label
+            >
+            <input
+              type="file"
+              id="fileUpload"
+              name="user<%= user.id %>File"
+              accept=".txt,.pdf,.png,.docx,.jpg,.jpeg"
+              class="mt-2 block w-full text-gray-600 border border-gray-300 rounded-lg p-2"
+            />
+          </div>
+          <button
+            type="submit"
+            id="submitBtn"
+            class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Upload
+          </button>
         </form>
+      </div>
     </div>
-</body>
+
+    <script>
+      function removeExistingPara() {
+        if (document.getElementsByClassName("fileSizePara").length > 0) {
+          const elements = document.getElementsByClassName("fileSizePara");
+          while (elements.length > 0)
+            elements[0].parentNode.removeChild(elements[0]);
+        }
+      }
+
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+
+      document
+        .getElementById("fileUpload")
+        .addEventListener("change", function () {
+          submitBtn.disabled = false;
+          let input = document.getElementById("fileUpload");
+          removeExistingPara();
+          if (input.files[0]) {
+            let file = input.files[0];
+            console.log(`File chosen: ${file.name}, Size: ${file.size}`);
+            addPara(
+              "File " +
+                file.name +
+                " is " +
+                (file.size / (1024 * 1024)).toFixed(2) +
+                " MB in size"
+            );
+            if (file.size > 5 * 1024 * 1024) {
+              addPara("File is Too Large, Maximum File Size accepted: 5MB");
+              submitBtn.disabled = true;
+            }
+          }
+        });
+
+      function addPara(text) {
+        let para = document.createElement("p");
+        para.className = "fileSizePara text-red-500 mt-2";
+        para.textContent = text;
+        const formDiv= document.getElementById("formDiv");
+        formDiv.appendChild(para);
+      }
+    </script>
+  </body>
 </html>

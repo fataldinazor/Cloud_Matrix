@@ -4,16 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <%-include("header.ejs")%>
+<body class="bg-gray-100">
+    <%- include("header.ejs") %>
 
-    <div class="userContainer">
-        <ul>
-            <%allUsers.forEach(user=>{%>
-                <li><a href="/users/<%=user.id%>"><%=user.username%></a></li>
-            <%})%>
-        </ul>
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-semibold text-gray-800 mb-4">Users</h1>
+        <div class="userContainer bg-white p-6 rounded-lg shadow-md">
+            <ul class="list-disc ml-6 space-y-3">
+                <% allUsers.forEach(user => { %>
+                    <li>
+                        <a href="/users/<%= user.id %>" class="text-blue-600 hover:text-blue-800 transition duration-200">
+                            <%= user.username %>
+                        </a>
+                    </li>
+                <% }) %>
+            </ul>
+        </div>
     </div>
 </body>
 </html>

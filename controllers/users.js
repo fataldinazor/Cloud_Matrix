@@ -74,7 +74,7 @@ const userCreateFolderPost = [
       });
     }
     let { folderName, private } = req.body;
-    private = private === true ? true : false;
+    private = private[1] === "true"? true : false;
     console.log(folderName, private, user_id);
     try {
       await prisma.folder.create({

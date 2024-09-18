@@ -52,7 +52,7 @@ const loginGet = (req, res) => {
 // POST login form and authenticate user
 const loginPost = (req, res, next) => {
   passport.authenticate("local", {
-    successRedirect: "/",
+    successRedirect: "/users",
     failureRedirect: "/log-in",
   })(req, res, next);
 };

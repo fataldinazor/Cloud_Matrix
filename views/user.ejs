@@ -3,50 +3,115 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%=user.username%></title>
+    <title><%= user.username %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <%-include("header.ejs")%>
-    <div class="container">
-      <h2><%=user.fname%> <%=user.lname%></h2>
-      <div class="createFolderForm">
-        <%if(errors){%>
-        <ul>
-          <%errors.forEach(error=>{%>
-          <li><%=error.msg%></li>
-          <%})%>
-        </ul>
-        <%}%>
-        <form action="/users/<%=user.id%>/create-folder" method="POST">
-          <label for="folderName"
-            >Folder Name:
-            <input
-              type="text"
-              id="folderName"
-              name="folderName"
-              placeholder="Enter Folder Name"
-            />
-          </label>
-          <label for="private"
-            >Want a Private Folder
-            <input type="checkbox" id="private" name="private" value="" />
-          </label>
-          <button type="submit">Create New Folder</button>
-        </form>
-      </div>
-      <div class="userFolderContainer">
-        <h4>Folders</h4>
-        <%if(folders){%>
-        <ul>
-          <%folders.forEach(folder=>{%>
-          <li>
-            <a href="/users/<%=user.id%>/<%=folder.id%>"><%=folder.name%></a>
+  <body class="bg-gray-100 text-gray-800">
+    <%- include("header.ejs") %>
 
+    <div class="container mx-auto p-6">
+      <!-- User Info -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-4">
+          <%= user.fname %> <%= user.lname %>
+        </h2>
+
+        <!-- Create Folder Form -->
+        <div class="createFolderForm">
+          <% if (errors && errors.length > 0) { %>
+          <ul class="bg-red-100 p-4 rounded mb-4 text-red-600">
+            <% errors.forEach(error => { %>
+            <li><%= error.msg %></li>
+            <% }) %>
+          </ul>
+          <% } %>
+
+          <form
+            action="/users/<%= user.id %>/create-folder"
+            method="POST"
+            class="space-y-4"
+          >
+            <div>
+              <label
+                for="folderName"
+                class="block text-sm font-medium text-gray-700"
+                >Folder Name</label
+              >
+              <input
+                type="text"
+                id="folderName"
+                name="folderName"
+                placeholder="Enter Folder Name"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="private"
+                name="private"
+                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label for="private" class="text-sm font-medium text-gray-700"
+                >Want a Private Folder</label
+              >
+               <!-- <input type="hidden" name="private" value="false" /> -->
+            </div>
+
+            <button
+              type="submit"
+              class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-300"
+            >
+              Create New Folder
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- User Folders -->
+      <div class="mt-6">
+        <h4 class="text-lg font-bold mb-4">Folders</h4>
+
+        <% if (folders && folders.length > 0) { %>
+        <ul class="space-y-4">
+          <% folders.forEach(folder => { %>
+          <li class="bg-white p-4 rounded-lg shadow-md">
+            <div class="flex justify-between items-center">
+              <a
+                href="/users/<%= user.id %>/<%= folder.id %>"
+                class="text-blue-600 font-semibold text-lg hover:underline"
+              >
+                <%= folder.name %>
+              </a>
+              <p>
+                <%let visibility=folder.private?"private":"public"%>
+                <%=visibility%>
+              </p>
+              <p class="text-gray-500 text-sm">
+                <%= new Date(folder.createdAt).toLocaleDateString('en-GB', {
+                day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+              </p>
+            </div>
           </li>
-          <%})%>
+          <% }) %>
         </ul>
-        <%}%>
+        <% } else { %>
+        <p class="text-gray-500">No folders found.</p>
+        <% } %>
       </div>
     </div>
+    <script>
+      const checkbox= document.getElementById("private");
+      const hiddenInput= document.createElement("input");
+      hiddenInput.type="hidden";
+      hiddenInput.name="private";
+      hiddenInput.value="false"
+      checkbox.parentNode.appendChild(hiddenInput);
+
+      checkbox.addEventListener("change", function(){
+        hiddenInput.value = this.checked?true:false
+      });
+    </script>
   </body>
 </html>
