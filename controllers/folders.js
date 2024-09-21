@@ -1,5 +1,5 @@
 const prisma = require("./prisma");
-const fs = require("fs");
+const {unlink} = require("node:fs");
 const multer = require("multer");
 const path = require("path");
 const storage = multer.diskStorage({
@@ -14,6 +14,8 @@ const storage = multer.diskStorage({
     );
   },
 });
+
+// });
 let maxSize = 5 * 1024 * 1024;
 const upload = multer({ storage: storage, limits: { fileSize: maxSize } });
 
@@ -45,11 +47,31 @@ const dynamicUpload = (req, res, next) => {
   });
 };
 
-const UploadFilePost = [
+checkDuplicateFilename=async(req, res, next)=>{
+  const orginalFileName= req.file.originalname;
+  const folder_id= parseInt(req.params.folder_id);
+  const file= await prisma.file.findFirst({
+    where:{
+      folderId:folder_id,
+      name: orginalFileName
+    }
+  })
+  if(file){
+    unlink(req.file.path,(err)=>{
+      if(err) throw err;
+      console.log("file was removed due to duplication")
+    })
+    return res. status(400).send({ message: "File with the same name exists." });
+  }
+  next();
+}
+
+const uploadFilePost = [
   dynamicUpload,
+  checkDuplicateFilename,
   async (req, res) => {
     let { user_id, folder_id } = req.params;
-
+    console.log(user_id);
     if (req.file) {
       await prisma.file.create({
         data: {
@@ -64,7 +86,7 @@ const UploadFilePost = [
 ];
 
 const downloadFile = async (req, res) => {
-  let { user_id, folder_id, file_id } = req.params;
+  let {file_id } = req.params;
   const file = await prisma.file.findUnique({
     where: {
       id: parseInt(file_id),
@@ -75,6 +97,6 @@ const downloadFile = async (req, res) => {
 
 module.exports = {
   getFolder,
-  UploadFilePost,
+  uploadFilePost,
   downloadFile,
 };

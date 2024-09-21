@@ -23,7 +23,7 @@ router.post("/users/:user_id/create-folder", usersController.userCreateFolderPos
 
 //folder
 router.get("/users/:user_id/:folder_id", folderController.getFolder)
-router.post("/users/:user_id/:folder_id/upload", folderController.UploadFilePost);
+router.post("/users/:user_id/:folder_id/upload", folderController.uploadFilePost);
 router.get("/users/:user_id/:folder_id/:file_id/download", folderController.downloadFile)
 
 //logout User

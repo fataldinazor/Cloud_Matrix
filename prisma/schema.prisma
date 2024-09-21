@@ -36,6 +36,7 @@ model File {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(255)
   url       String   @db.VarChar(511)
+  size      Int
   createdAt DateTime @default(now())
   Folder    Folder   @relation(fields: [folderId], references: [id])
   folderId  Int
