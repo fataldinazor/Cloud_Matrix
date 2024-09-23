@@ -22,6 +22,9 @@ const uniqueFolderName = body("folderName").custom(async (value, {req}) => {
 
 const allUsers = async (req, res) => {
   const allUsers = await prisma.user.findMany();
+  if(allUsers.length<1){
+    res.redirect('sign-up');
+  }
   res.render("allUsers", {
     allUsers: allUsers,
   });
@@ -35,19 +38,33 @@ const userGet = async (req, res) => {
         id: user_id,
       },
     });
-    const folders = await prisma.folder.findMany({
+    const allfolders = await prisma.folder.findMany({
       where: {
         userId: user_id,
       },
     });
+    const publicFolders = await prisma.folder.findMany({
+      where:{
+        userId:user_id,
+        private:false
+      }
+    })
     if (!user) {
       return res.status(404).send("User Not Found");
     }
-    res.render("user", {
-      user: user,
-      folders: folders,
-      errors: [],
-    });
+    if(user_id===req.session.passport.user){
+      res.render("user", {
+        selected_user: user,
+        folders: allfolders,
+        errors: [],
+      });
+    }else{
+      res.render("user", {
+        selected_user: user,
+        folders: publicFolders,
+        errors: [],
+      });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send("Server Error");
@@ -57,6 +74,9 @@ const userGet = async (req, res) => {
 const userCreateFolderPost = [
   uniqueFolderName,
   async (req, res) => {
+    if(req.user.id!==parseInt(req.params.user_id)){
+      return res.status(400).send("You are not authorized to make this folder")
+    }
     const errors = validationResult(req);
     const user_id = parseInt(req.params.user_id);
 

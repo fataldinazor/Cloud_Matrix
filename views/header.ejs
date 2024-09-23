@@ -1,23 +1,42 @@
-<header class="bg-gray-800 text-white py-4 px-6 flex justify-between items-center shadow-md">
+<header
+  class="bg-gray-800 text-white py-4 px-6 flex justify-between items-center shadow-md"
+>
   <h2 class="text-2xl font-bold">Website Name</h2>
   <ul class="flex space-x-6">
     <% if(!user){ %>
-      <li>
-        <a href="/sign-up" class="text-white hover:text-gray-300 transition-colors duration-200">Sign-Up</a>
-      </li>
-      <li>
-        <a href="/log-in" class="text-white hover:text-gray-300 transition-colors duration-200">Log-In</a>
-      </li>
+    <li>
+      <a
+        href="/sign-up"
+        class="text-white hover:text-gray-300 transition-colors duration-200"
+        >Sign-Up</a
+      >
+    </li>
+    <li>
+      <a
+        href="/log-in"
+        class="text-white hover:text-gray-300 transition-colors duration-200"
+        >Log-In</a
+      >
+    </li>
     <% } else { %>
-        <li>
-            <a href="/users">All Users</a>
-        </li>
-        <li>
-            <a href="/users/<%=user.id%>" class="text-white hover:text-gray-300 transition-colors duration-200">Your Folders</a>
-        </li>
-      <li>
-        <a href="/logout" class="text-white hover:text-gray-300 transition-colors duration-200">Log-Out</a>
-      </li>
+    <li><%=user.username%></li>
+    <li>
+      <a  class="text-white hover:text-gray-300 transition-colors duration-200" href="/users">All Users</a>
+    </li>
+    <li>
+      <a
+        href="/users/<%=user.id%>"
+        class="text-white hover:text-gray-300 transition-colors duration-200"
+        >Your Folders</a
+      >
+    </li>
+    <li>
+      <a
+        href="/logout"
+        class="text-white hover:text-gray-300 transition-colors duration-200"
+        >Log-Out</a
+      >
+    </li>
     <% } %>
   </ul>
 </header>

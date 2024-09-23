@@ -41,8 +41,8 @@ app.use("/", router);
 app.get("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) return next(err);
+    res.redirect("/log-in");
   });
-  res.redirect("/log-in");
 });
 
 // To handle client entering to wrong url

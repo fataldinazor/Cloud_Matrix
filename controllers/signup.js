@@ -112,7 +112,7 @@ const signupPost = [
   validateUser,
   usernameMatch,
   passwordsMatch,
-  async (req, res) => {
+  async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).render("signup", {
@@ -122,7 +122,7 @@ const signupPost = [
     const { fname, lname, username, password } = req.body;
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      await prisma.user.create({
+      const user = await prisma.user.create({
         data: {
           fname: fname,
           lname: lname,
@@ -136,7 +136,7 @@ const signupPost = [
         if (err) {
           return next(err);
         }
-        return res.redirect("/log-in");
+        return res.redirect(`/users/${user.id}`);
       });
     } catch (err) {
       res.status(500).render("signup", {

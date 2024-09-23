@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= user.username %></title>
+    <title><%= selected_user.username %></title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-100 text-gray-800">
@@ -12,8 +12,8 @@
     <div class="container mx-auto p-6">
       <!-- User Info -->
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold mb-4">
-          <%= user.fname %> <%= user.lname %>
+        <h2 class="text-2xl font-bold">
+          <%= selected_user.fname %> <%= selected_user.lname %>
         </h2>
 
         <!-- Create Folder Form -->
@@ -25,47 +25,48 @@
             <% }) %>
           </ul>
           <% } %>
-
-          <form
-            action="/users/<%= user.id %>/create-folder"
+          <% if(user.id===selected_user.id){%>
+            <form
+            action="/users/<%= selected_user.id %>/create-folder"
             method="POST"
-            class="space-y-4"
-          >
+            class="space-y-4 mt-4"
+            >
             <div>
               <label
-                for="folderName"
-                class="block text-sm font-medium text-gray-700"
-                >Folder Name</label
+              for="folderName"
+              class="block text-sm font-medium text-gray-700"
+              >Folder Name</label
               >
               <input
-                type="text"
-                id="folderName"
-                name="folderName"
-                placeholder="Enter Folder Name"
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              id="folderName"
+              name="folderName"
+              placeholder="Enter Folder Name"
+              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
+            
             <div class="flex items-center space-x-2">
               <input
-                type="checkbox"
-                id="private"
-                name="private"
-                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              type="checkbox"
+              id="private"
+              name="private"
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label for="private" class="text-sm font-medium text-gray-700"
-                >Want a Private Folder</label
+              >Want a Private Folder</label
               >
-               <!-- <input type="hidden" name="private" value="false" /> -->
+              <!-- <input type="hidden" name="private" value="false" /> -->
             </div>
-
+            
             <button
-              type="submit"
-              class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-300"
+            type="submit"
+            class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-300"
             >
-              Create New Folder
-            </button>
-          </form>
+            Create New Folder
+          </button>
+        </form>
+          <%}%>
         </div>
       </div>
 

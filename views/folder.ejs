@@ -15,6 +15,9 @@
       </h2>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <%if(files.length<1){%>
+          <div>No file available here</div>
+        <%}%>
         <% files.forEach(file => { %>
         <div class="bg-white p-4 rounded-lg shadow-lg">
           <p class="font-medium text-lg text-gray-700"><%= file.name %></p>
@@ -22,15 +25,34 @@
             <%= new Date(file.createdAt).toLocaleDateString('en-GB', { day:
             '2-digit', month: '2-digit', year: 'numeric' }) %>
           </li>
-          <a
-            href="/users/<%=user.id%>/<%=folder.id%>/<%=file.id%>/download"
-            class="mt-2 inline-block bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
-            >Download</a
-          >
+          <li class="text-gray-500 text-sm">
+            <%= (file.size / (1024 * 1024)).toFixed(2)+"MB" %>
+          </li>
+          <div class="flex gap-x-4">
+            <a
+              href="/users/<%=user.id%>/<%=folder.id%>/<%=file.id%>/download"
+              class="mt-2 inline-block bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
+              >Download</a
+            >
+            <%if(user.id===folder.userId){%>
+            <form
+              action="/users/<%=user.id%>/<%=folder.id%>/<%=file.id%>/delete"
+              method="POST"
+            >
+              <button
+                type="submit"
+                class="mt-2 inline-block bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-200"
+              >
+                Delete
+              </button>
+            </form>
+            <%}%>
+          </div>
         </div>
         <% }) %>
       </div>
 
+      <% if(user.id===folder.userId){%>
       <div id="formDiv" class="mt-6 bg-white p-6 rounded-lg shadow-lg">
         <form
           action="/users/<%=user.id%>/<%=folder.id%>/upload"
@@ -60,6 +82,7 @@
           </button>
         </form>
       </div>
+      <%}%>
     </div>
 
     <script>
@@ -101,7 +124,7 @@
         let para = document.createElement("p");
         para.className = "fileSizePara text-red-500 mt-2";
         para.textContent = text;
-        const formDiv= document.getElementById("formDiv");
+        const formDiv = document.getElementById("formDiv");
         formDiv.appendChild(para);
       }
     </script>
