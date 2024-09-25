@@ -1,5 +1,5 @@
 const prisma = require("./prisma");
-const { unlink, fstat } = require("node:fs");
+const { unlink } = require("node:fs");
 const multer = require("multer");
 const path = require("path");
 const storage = multer.diskStorage({
@@ -14,9 +14,15 @@ const storage = multer.diskStorage({
     );
   },
 });
-
 let maxSize = 5 * 1024 * 1024;
 const upload = multer({ storage: storage, limits: { fileSize: maxSize } });
+
+const isUserAuthorized = (req, res, next) => {
+  const profile_user_id = parseInt(req.params.user_id);
+  const logged_user_id = parseInt(req.session.passport.user);
+  if (profile_user_id === logged_user_id) next();
+  else res.status(403).send("Forbidden: Unauthorized access");
+};
 
 const getFolder = async (req, res) => {
   let { user_id, folder_id } = req.params;
@@ -24,7 +30,7 @@ const getFolder = async (req, res) => {
     where: { id: parseInt(folder_id) },
   });
   if (folder.private === true && req.user.id !== parseInt(user_id)) {
-    res.redirect("/users");
+    res.redirect(`/users/${user_id}`);
   }
   const files = await prisma.file.findMany({
     where: {
@@ -93,17 +99,16 @@ const uploadFilePost = [
   },
 ];
 
-const deleteFile = async (req, res) => {
+const deleteFile = [isUserAuthorized, async (req, res) => {
   const { user_id, folder_id, file_id } = req.params;
-  if (req.session.passport.user !== parseInt(user_id)) {
-    return res.status(400).send("You are not authorized to delete this post");
-  }
   const file = await prisma.file.findUnique({
     where: {
       id: parseInt(file_id),
     },
   });
-  console.log(file);
+  if(!file){
+    return res.status(404).send("File not found");
+  }
   unlink(file.url, () => {
     console.log("file was removed form the uploads folder");
   });
@@ -113,7 +118,7 @@ const deleteFile = async (req, res) => {
     },
   });
   res.redirect(`/users/${user_id}/${folder_id}`);
-};
+}];
 
 const downloadFile = async (req, res) => {
   let { file_id } = req.params;
@@ -130,4 +135,5 @@ module.exports = {
   getFolder,
   uploadFilePost,
   downloadFile,
+  isUserAuthorized
 };

@@ -12,7 +12,7 @@
     <div class="container mx-auto p-6">
       <!-- User Info -->
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold">
+        <h2 class="text-2xl font-bold mb-2">
           <%= selected_user.fname %> <%= selected_user.lname %>
         </h2>
 
@@ -25,48 +25,58 @@
             <% }) %>
           </ul>
           <% } %>
-          <% if(user.id===selected_user.id){%>
-            <form
+          <% if (user.id === selected_user.id) { %>
+          <form
             action="/users/<%= selected_user.id %>/create-folder"
             method="POST"
-            class="space-y-4 mt-4"
-            >
+            class="grid grid-cols-1 gap-4 mt-4"
+          >
             <div>
               <label
-              for="folderName"
-              class="block text-sm font-medium text-gray-700"
-              >Folder Name</label
+                for="folderName"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Folder Name</label
               >
               <input
-              type="text"
-              id="folderName"
-              name="folderName"
-              placeholder="Enter Folder Name"
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                type="text"
+                id="folderName"
+                name="folderName"
+                placeholder="Enter Folder Name"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
-            <div class="flex items-center space-x-2">
-              <input
-              type="checkbox"
-              id="private"
-              name="private"
-              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label for="private" class="text-sm font-medium text-gray-700"
-              >Want a Private Folder</label
-              >
-              <!-- <input type="hidden" name="private" value="false" /> -->
+
+            <div class="flex items-center space-x-4">
+              <div class="flex items-center">
+                <input
+                  type="radio"
+                  id="public"
+                  name="visibility"
+                  value="public"
+                  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label for="public" class="text-sm font-medium text-gray-700 ml-1">Public Folder</label>
+              </div>
+              <div class="flex items-center">
+                <input
+                  type="radio"
+                  id="private"
+                  name="visibility"
+                  value="private"
+                  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label for="private" class="text-sm font-medium text-gray-700 ml-1">Private Folder</label>
+              </div>
             </div>
-            
+
             <button
-            type="submit"
-            class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-300"
+              type="submit"
+              class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-300"
             >
-            Create New Folder
-          </button>
-        </form>
-          <%}%>
+              Create New Folder
+            </button>
+          </form>
+          <% } %>
         </div>
       </div>
 
@@ -75,25 +85,76 @@
         <h4 class="text-lg font-bold mb-4">Folders</h4>
 
         <% if (folders && folders.length > 0) { %>
-        <ul class="space-y-4">
+        <ul class="grid grid-cols-1 gap-4">
           <% folders.forEach(folder => { %>
           <li class="bg-white p-4 rounded-lg shadow-md">
             <div class="flex justify-between items-center">
               <a
-                href="/users/<%= user.id %>/<%= folder.id %>"
+                href="/users/<%= selected_user.id %>/<%= folder.id %>"
                 class="text-blue-600 font-semibold text-lg hover:underline"
               >
                 <%= folder.name %>
               </a>
-              <p>
-                <%let visibility=folder.private?"private":"public"%>
-                <%=visibility%>
-              </p>
-              <p class="text-gray-500 text-sm">
-                <%= new Date(folder.createdAt).toLocaleDateString('en-GB', {
-                day: '2-digit', month: '2-digit', year: 'numeric' }) %>
-              </p>
+              <div class="flex items-center space-x-2">
+                <span class="text-gray-600 font-medium">
+                  <% let visibility = folder.private ? "Private" : "Public" %>
+                  <%= visibility %>
+                </span>
+                <p class="text-gray-500 text-sm">
+                  <%= new Date(folder.createdAt).toLocaleDateString('en-GB', {
+                  day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+                </p>
+                <% if (selected_user.id === user.id) { %>
+                <form action="/users/<%= selected_user.id %>/<%= folder.id %>/delete" method="POST">
+                  <button type="submit" class="text-red-600 hover:underline">
+                    Delete
+                  </button>
+                </form>
+
+                <button
+                  class="editBtn bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 transition duration-200 font-semibold"
+                >
+                  Edit
+                </button>
+                <% } %>
+              </div>
             </div>
+            <% if (selected_user.id === user.id) { %>
+            <form
+              action="/users/<%= selected_user.id %>/<%= folder.id %>/edit"
+              method="POST"
+              class="hidden space-y-4 bg-gray-50 p-4 rounded-md shadow-lg mt-4 editForm"
+            >
+              <label for="folderName" class="block text-sm font-medium text-gray-700">
+                New Folder Name:
+              </label>
+              <input
+                type="text"
+                id="folderName"
+                name="folderName"
+                value="<%= folder.name %>"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                  <input type="radio" id="publicEdit" name="visibility" value="public"
+                  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" <%= folder.private === false ? "checked" : "" %> />
+                  <label for="publicEdit" class="text-sm font-medium text-gray-700 ml-1">Public Folder</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="radio" id="privateEdit" name="visibility" value="private"
+                  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" <%= folder.private === true ? "checked" : "" %> />
+                  <label for="privateEdit" class="text-sm font-medium text-gray-700 ml-1">Private Folder</label>
+                </div>
+              </div>
+              <button
+                type="submit"
+                class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-300"
+              >
+                Save Changes
+              </button>
+            </form>
+            <% } %>
           </li>
           <% }) %>
         </ul>
@@ -103,16 +164,13 @@
       </div>
     </div>
     <script>
-      const checkbox= document.getElementById("private");
-      const hiddenInput= document.createElement("input");
-      hiddenInput.type="hidden";
-      hiddenInput.name="private";
-      hiddenInput.value="false"
-      checkbox.parentNode.appendChild(hiddenInput);
-
-      checkbox.addEventListener("change", function(){
-        hiddenInput.value = this.checked?true:false
-      });
+      const editBtns = document.getElementsByClassName("editBtn");
+      const editForms = document.getElementsByClassName("editForm");
+      for (let i = 0; i < editBtns.length; i++) {
+        editBtns[i].addEventListener("click", () => {
+          editForms[i].classList.toggle("hidden");
+        });
+      }
     </script>
   </body>
 </html>

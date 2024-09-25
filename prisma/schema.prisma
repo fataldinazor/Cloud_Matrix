@@ -27,7 +27,7 @@ model Folder {
   name      String   @unique @db.VarChar(255)
   private   Boolean  @default(false)
   createdAt DateTime @default(now())
-  files     File[]
+  files     File[]    
   User      User     @relation(fields: [userId], references: [id])
   userId    Int
 }
@@ -38,7 +38,7 @@ model File {
   url       String   @db.VarChar(511)
   size      Int
   createdAt DateTime @default(now())
-  Folder    Folder   @relation(fields: [folderId], references: [id])
+  Folder    Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
   folderId  Int
 }
 

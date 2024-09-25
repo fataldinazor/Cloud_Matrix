@@ -3,7 +3,7 @@ const homepage = (req, res)=>{
         res.redirect("/sign-up")
     }
     else{
-        res.redirect(`users/${req.user.user_id}`)
+        res.redirect(`/users`)
     }
 }
 

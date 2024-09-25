@@ -19,13 +19,14 @@ router.post("/log-in", loginController.loginPost);
 //users
 router.get("/users", usersController.allUsers);
 router.get("/users/:user_id", usersController.userGet);
-router.post("/users/:user_id/create-folder", usersController.userCreateFolderPost)
+router.post("/users/:user_id/create-folder", usersController.userCreateFolderPost);
+router.post("/users/:user_id/:folder_id/edit", usersController.editFolderPost);
+router.post("/users/:user_id/:folder_id/delete", usersController.deleteFolderPost);
 
 //folder
 router.get("/users/:user_id/:folder_id", folderController.getFolder)
 router.post("/users/:user_id/:folder_id/upload", folderController.uploadFilePost);
 router.get("/users/:user_id/:folder_id/:file_id/download", folderController.downloadFile);
 router.post("/users/:user_id/:folder_id/:file_id/delete", folderController.deleteFile);
-
 //logout User
 module.exports = router;
