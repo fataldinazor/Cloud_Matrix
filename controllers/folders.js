@@ -1,21 +1,13 @@
 const prisma = require("./prisma");
 const { unlink } = require("node:fs");
 const multer = require("multer");
-const path = require("path");
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.resolve(__dirname, "../uploads"));
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e3)}`;
-    cb(
-      null,
-      `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`
-    );
-  },
-});
+// const path = require("path");
+const cloudinary = require("../cloudinaryConfig");
+const streamifier = require("streamifier");
+
+const storage = multer.memoryStorage();
 let maxSize = 5 * 1024 * 1024;
-const upload = multer({ storage: storage, limits: { fileSize: maxSize } });
+const upload = multer({ storage, limits: { fileSize: maxSize } });
 
 const isUserAuthorized = (req, res, next) => {
   const profile_user_id = parseInt(req.params.user_id);
@@ -24,6 +16,8 @@ const isUserAuthorized = (req, res, next) => {
   else res.status(403).send("Forbidden: Unauthorized access");
 };
 
+//get all the files in a folder
+//  (checks user is folder owner or not to show private folders)
 const getFolder = async (req, res) => {
   let { user_id, folder_id } = req.params;
   const folder = await prisma.folder.findUnique({
@@ -74,51 +68,75 @@ checkDuplicateFilename = async (req, res, next) => {
   next();
 };
 
+function uploadToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    let stream = cloudinary.uploader.upload_stream(
+      { folder: "fileUploaderApp", resource_type: "auto" },
+      (error, result) => {
+        if (result) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      }
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+}
+
 const uploadFilePost = [
+  isUserAuthorized,
   dynamicUpload,
   checkDuplicateFilename,
   async (req, res) => {
     let { user_id, folder_id } = req.params;
-    console.log(user_id, req.session.passport.user);
-    if (req.session.passport.user !== parseInt(user_id)) {
-      return res
-        .status(400)
-        .send(`The user is not authorized to upload files here`);
-    }
+    console.log(req.file);
     if (req.file) {
-      await prisma.file.create({
-        data: {
-          name: req.file.originalname,
-          folderId: parseInt(folder_id),
-          url: req.file.path,
-          size: req.file.size,
-        },
-      });
+      try {
+        const result = await uploadToCloudinary(req.file.buffer);
+        await prisma.file.create({
+          data: {
+            name: req.file.originalname,
+            folderId: parseInt(folder_id),
+            url: result.secure_url,
+            size: req.file.size,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+        return res.status(500).send("Error Uploading file to Cloudinary");
+      }
+    } else {
+      return res.status(400).send("No File to Upload");
     }
     res.redirect(`/users/${user_id}/${folder_id}`);
   },
 ];
 
-const deleteFile = [isUserAuthorized, async (req, res) => {
-  const { user_id, folder_id, file_id } = req.params;
-  const file = await prisma.file.findUnique({
-    where: {
-      id: parseInt(file_id),
-    },
-  });
-  if(!file){
-    return res.status(404).send("File not found");
-  }
-  unlink(file.url, () => {
-    console.log("file was removed form the uploads folder");
-  });
-  await prisma.file.delete({
-    where: {
-      id: parseInt(file_id),
-    },
-  });
-  res.redirect(`/users/${user_id}/${folder_id}`);
-}];
+const deleteFile = [
+  isUserAuthorized,
+  async (req, res) => {
+    const { user_id, folder_id, file_id } = req.params;
+    const file = await prisma.file.findUnique({
+      where: {
+        id: parseInt(file_id),
+      },
+    });
+    if (!file) {
+      return res.status(404).send("File not found");
+    }
+    unlink(file.url, () => {
+      console.log("file was removed form the uploads folder");
+    });
+    await prisma.file.delete({
+      where: {
+        id: parseInt(file_id),
+      },
+    });
+    res.redirect(`/users/${user_id}/${folder_id}`);
+  },
+];
 
 const downloadFile = async (req, res) => {
   let { file_id } = req.params;
@@ -135,5 +153,5 @@ module.exports = {
   getFolder,
   uploadFilePost,
   downloadFile,
-  isUserAuthorized
+  isUserAuthorized,
 };
