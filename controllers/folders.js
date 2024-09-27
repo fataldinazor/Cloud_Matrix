@@ -1,7 +1,7 @@
 const prisma = require("./prisma");
 const { unlink } = require("node:fs");
 const multer = require("multer");
-// const path = require("path");
+const axios = require("axios");
 const cloudinary = require("../cloudinaryConfig");
 const streamifier = require("streamifier");
 
@@ -17,7 +17,7 @@ const isUserAuthorized = (req, res, next) => {
 };
 
 //get all the files in a folder
-//  (checks user is folder owner or not to show private folders)
+//(checks user is folder owner or not to show private folders)
 const getFolder = async (req, res) => {
   let { user_id, folder_id } = req.params;
   const folder = await prisma.folder.findUnique({
@@ -37,6 +37,7 @@ const getFolder = async (req, res) => {
   });
 };
 
+//upload file using multer and getting req.file object
 const dynamicUpload = (req, res, next) => {
   const uploadFile = upload.single(`user${req.params.user_id}File`);
   uploadFile(req, res, function (err) {
@@ -49,6 +50,8 @@ const dynamicUpload = (req, res, next) => {
   });
 };
 
+//checking for file duplication
+//if a file exists with the same name
 checkDuplicateFilename = async (req, res, next) => {
   const orginalFileName = req.file.originalname;
   const folder_id = parseInt(req.params.folder_id);
@@ -59,15 +62,13 @@ checkDuplicateFilename = async (req, res, next) => {
     },
   });
   if (file) {
-    unlink(req.file.path, (err) => {
-      if (err) throw err;
-      console.log("file was removed due to duplication");
-    });
-    return res.status(400).send({ message: "File with the same name exists." });
+    return res.status(400).send("File with the same name exists.");
   }
   next();
 };
 
+//uploading a file to cloudinary by giving a bufer stream
+//streamfier is used to give buffer stream to cloudinary
 function uploadToCloudinary(buffer) {
   return new Promise((resolve, reject) => {
     let stream = cloudinary.uploader.upload_stream(
@@ -85,27 +86,40 @@ function uploadToCloudinary(buffer) {
   });
 }
 
+//uploading the file to cloudinary and then
+//the file credentials to prisma
 const uploadFilePost = [
   isUserAuthorized,
   dynamicUpload,
   checkDuplicateFilename,
   async (req, res) => {
     let { user_id, folder_id } = req.params;
-    console.log(req.file);
     if (req.file) {
       try {
+        //uploading to cloudinary
         const result = await uploadToCloudinary(req.file.buffer);
-        await prisma.file.create({
-          data: {
-            name: req.file.originalname,
-            folderId: parseInt(folder_id),
-            url: result.secure_url,
-            size: req.file.size,
-          },
+        //creating a transaction to create new file creadentials in prisma
+        await prisma.$transaction(async (prisma) => {
+          await prisma.file.create({
+            data: {
+              name: req.file.originalname,
+              folderId: parseInt(folder_id),
+              url: result.secure_url,
+              size: req.file.size,
+              public_id: result.public_id,
+            },
+          });
         });
+        console.log(
+          "File upload to Cloudinary and saved in the DB successfully"
+        );
       } catch (err) {
-        console.log(err);
-        return res.status(500).send("Error Uploading file to Cloudinary");
+        // if the transactions fails the file gets deleted from cloud as well
+        if (result && result.public_id) {
+          await cloudinary.uploader.destroy(result.public_id);
+        }
+        console.error("Error occurred:", err);
+        return res.status(500).send("Error uploading file");
       }
     } else {
       return res.status(400).send("No File to Upload");
@@ -114,6 +128,7 @@ const uploadFilePost = [
   },
 ];
 
+// deleting the file
 const deleteFile = [
   isUserAuthorized,
   async (req, res) => {
@@ -126,9 +141,7 @@ const deleteFile = [
     if (!file) {
       return res.status(404).send("File not found");
     }
-    unlink(file.url, () => {
-      console.log("file was removed form the uploads folder");
-    });
+    await cloudinary.uploader.destroy(file.public_id);
     await prisma.file.delete({
       where: {
         id: parseInt(file_id),
@@ -145,7 +158,23 @@ const downloadFile = async (req, res) => {
       id: parseInt(file_id),
     },
   });
-  res.download(file.url);
+
+  if (!file) {
+    return res.status(404).send("File not Found");
+  }
+  
+  try {
+    const response = await axios({
+      url: file.url,
+      method: "GET",
+      responseType: "stream",
+    });
+    res.setHeader("Content-Disposition", `attachment; filename="${file.name}"`);
+    response.data.pipe(res);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Error downloading file");
+  }
 };
 
 module.exports = {

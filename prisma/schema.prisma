@@ -37,6 +37,7 @@ model File {
   name      String   @db.VarChar(255)
   url       String   @db.VarChar(511)
   size      Int
+  public_id String   @db.VarChar(255)
   createdAt DateTime @default(now())
   Folder    Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
   folderId  Int
