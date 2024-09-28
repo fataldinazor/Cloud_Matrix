@@ -1,8 +1,9 @@
 const prisma = require("./prisma");
 const { body, validationResult } = require("express-validator");
-const { isUserAuthorized } = require("./folders");
-const { unlink } = require("node:fs");
+// const { isUserAuthorized } = require("./folders");
+const cloudinary = require("../cloudinaryConfig.js");
 
+//using express-validator for folder duplication check
 const uniqueFolderName = body("folderName").custom(async (value, { req }) => {
   try {
     const user_id = parseInt(req.params.user_id);
@@ -22,6 +23,7 @@ const uniqueFolderName = body("folderName").custom(async (value, { req }) => {
   }
 });
 
+// GETTING all users available on the site
 const allUsers = async (req, res) => {
   const allUsers = await prisma.user.findMany();
   if (allUsers.length < 1) {
@@ -32,6 +34,7 @@ const allUsers = async (req, res) => {
   });
 };
 
+// GETTING all the files asscoiated with a user
 const userGet = async (req, res) => {
   const user_id = parseInt(req.params.user_id);
   try {
@@ -40,11 +43,14 @@ const userGet = async (req, res) => {
         id: user_id,
       },
     });
+    //getting all the folders associated with a user
     const allfolders = await prisma.folder.findMany({
       where: {
         userId: user_id,
       },
     });
+
+    //getting all the public folders of the user
     const publicFolders = await prisma.folder.findMany({
       where: {
         userId: user_id,
@@ -54,6 +60,9 @@ const userGet = async (req, res) => {
     if (!user) {
       return res.status(404).send("User Not Found");
     }
+    // if the folder belongs to logged user then
+    //show all the folders
+    //else only show the private folders
     if (user_id === req.session.passport.user) {
       res.render("user", {
         selected_user: user,
@@ -73,9 +82,10 @@ const userGet = async (req, res) => {
   }
 };
 
+// CREATING a new Folder for user
 const userCreateFolderPost = [
+  // isUserAuthorized,
   uniqueFolderName,
-  isUserAuthorized,
   async (req, res) => {
     const errors = validationResult(req);
     const user_id = parseInt(req.params.user_id);
@@ -112,8 +122,9 @@ const userCreateFolderPost = [
   },
 ];
 
+//EDIT Folder name and visibility
 const editFolderPost=[
-  isUserAuthorized,
+  // isUserAuthorized,
   async(req, res)=>{
     const {user_id, folder_id} =req.params;
     let {folderName, visibility}= req.body;
@@ -131,8 +142,9 @@ const editFolderPost=[
   }
 ]
 
+// DELETE a folder and the files inside it.
 const deleteFolderPost = [
-  isUserAuthorized,
+  // isUserAuthorized,
   async (req, res) => {
     const { user_id, folder_id } = req.params;
     let files_in_folder=await prisma.file.findMany({
@@ -140,12 +152,20 @@ const deleteFolderPost = [
         folderId:parseInt(folder_id)
       }
     })
+    // deleting all the files associated with the folder 
+    // from cloudinary 
+    // files_in_folder.forEach(async file=>{
+    //   await cloudinary.uploader.destroy(file.public_id);
+    // })
+    const deletePromises = files_in_folder.map((file)=>
+      cloudinary.uploader.destroy(file.public_id)
+    )
 
-    files_in_folder.forEach(file=>{
-      unlink(file.url, () => {
-        console.log("File was deleted from the Disk Storage");
-      });
-    })
+    await Promise.all(deletePromises);
+
+    // deleting the folder from database
+    // this will also delete associated files as 
+    // files are cascaded to the folder
     await prisma.folder.delete({
       where: {
         id: parseInt(folder_id),

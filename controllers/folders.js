@@ -1,5 +1,4 @@
 const prisma = require("./prisma");
-const { unlink } = require("node:fs");
 const multer = require("multer");
 const axios = require("axios");
 const cloudinary = require("../cloudinaryConfig");
@@ -9,12 +8,14 @@ const storage = multer.memoryStorage();
 let maxSize = 5 * 1024 * 1024;
 const upload = multer({ storage, limits: { fileSize: maxSize } });
 
-const isUserAuthorized = (req, res, next) => {
-  const profile_user_id = parseInt(req.params.user_id);
-  const logged_user_id = parseInt(req.session.passport.user);
-  if (profile_user_id === logged_user_id) next();
-  else res.status(403).send("Forbidden: Unauthorized access");
-};
+// // middleware to recoganise if the logged user 
+// // owns the profile
+// const isUserAuthorized = (req, res, next) => {
+//   const profile_user_id = parseInt(req.params.user_id);
+//   const logged_user_id = parseInt(req.session.passport.user);
+//   if (profile_user_id === logged_user_id) next();
+//   else res.status(403).send("Forbidden: Unauthorized access");
+// };
 
 //get all the files in a folder
 //(checks user is folder owner or not to show private folders)
@@ -89,7 +90,7 @@ function uploadToCloudinary(buffer) {
 //uploading the file to cloudinary and then
 //the file credentials to prisma
 const uploadFilePost = [
-  isUserAuthorized,
+  // isUserAuthorized,
   dynamicUpload,
   checkDuplicateFilename,
   async (req, res) => {
@@ -98,6 +99,7 @@ const uploadFilePost = [
       try {
         //uploading to cloudinary
         const result = await uploadToCloudinary(req.file.buffer);
+        console.log(req.file,result);
         //creating a transaction to create new file creadentials in prisma
         await prisma.$transaction(async (prisma) => {
           await prisma.file.create({
@@ -130,7 +132,7 @@ const uploadFilePost = [
 
 // deleting the file
 const deleteFile = [
-  isUserAuthorized,
+  // isUserAuthorized,
   async (req, res) => {
     const { user_id, folder_id, file_id } = req.params;
     const file = await prisma.file.findUnique({
@@ -151,7 +153,9 @@ const deleteFile = [
   },
 ];
 
+//downloading file 
 const downloadFile = async (req, res) => {
+  //getting the file credentials from database
   let { file_id } = req.params;
   const file = await prisma.file.findUnique({
     where: {
@@ -162,7 +166,8 @@ const downloadFile = async (req, res) => {
   if (!file) {
     return res.status(404).send("File not Found");
   }
-  
+
+  // Dowloading file from cloudinary
   try {
     const response = await axios({
       url: file.url,
@@ -182,5 +187,5 @@ module.exports = {
   getFolder,
   uploadFilePost,
   downloadFile,
-  isUserAuthorized,
+  // isUserAuthorized,
 };

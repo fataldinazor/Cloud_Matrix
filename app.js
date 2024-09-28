@@ -10,16 +10,17 @@ const PORT = process.env.PORT;
 const router = require("./routes/router");
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
 const { PrismaClient } = require("@prisma/client");
+const favicon = require("serve-favicon");
 
 const app = express();
 app.set("view engine", "ejs");
 
 app.use(
   session({
-    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
+    cookie: { maxAge: 10 * 24 * 60 * 60 * 1000 },
     secret: process.env.SESSION_SECRET,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     store: new PrismaSessionStore(new PrismaClient(), {
       checkPeriod: 2 * 60 * 1000,
       dbRecordIdIsSessionId: true,
@@ -29,6 +30,7 @@ app.use(
 );
 
 app.use(passport.session());
+app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
 app.use(express.static(path.resolve(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,12 +40,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/", router);
-app.get("/logout", (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.redirect("/log-in");
-  });
-});
+
 
 // To handle client entering to wrong url
 // app.all("*", (req, res, next) => {
