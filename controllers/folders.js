@@ -8,22 +8,14 @@ const storage = multer.memoryStorage();
 let maxSize = 5 * 1024 * 1024;
 const upload = multer({ storage, limits: { fileSize: maxSize } });
 
-// // middleware to recoganise if the logged user 
-// // owns the profile
-// const isUserAuthorized = (req, res, next) => {
-//   const profile_user_id = parseInt(req.params.user_id);
-//   const logged_user_id = parseInt(req.session.passport.user);
-//   if (profile_user_id === logged_user_id) next();
-//   else res.status(403).send("Forbidden: Unauthorized access");
-// };
-
 //get all the files in a folder
 //(checks user is folder owner or not to show private folders)
 const getFolder = async (req, res) => {
-  let { user_id, folder_id } = req.params;
+  let { user_id, folder_id } = req.params;  
   const folder = await prisma.folder.findUnique({
     where: { id: parseInt(folder_id) },
   });
+  if(!folder) return res.status(404).send("Folder doesn't exists");
   if (folder.private === true && req.user.id !== parseInt(user_id)) {
     res.redirect(`/users/${user_id}`);
   }
@@ -90,7 +82,6 @@ function uploadToCloudinary(buffer) {
 //uploading the file to cloudinary and then
 //the file credentials to prisma
 const uploadFilePost = [
-  // isUserAuthorized,
   dynamicUpload,
   checkDuplicateFilename,
   async (req, res) => {
@@ -99,7 +90,6 @@ const uploadFilePost = [
       try {
         //uploading to cloudinary
         const result = await uploadToCloudinary(req.file.buffer);
-        console.log(req.file,result);
         //creating a transaction to create new file creadentials in prisma
         await prisma.$transaction(async (prisma) => {
           await prisma.file.create({
@@ -132,7 +122,6 @@ const uploadFilePost = [
 
 // deleting the file
 const deleteFile = [
-  // isUserAuthorized,
   async (req, res) => {
     const { user_id, folder_id, file_id } = req.params;
     const file = await prisma.file.findUnique({
@@ -187,5 +176,4 @@ module.exports = {
   getFolder,
   uploadFilePost,
   downloadFile,
-  // isUserAuthorized,
 };

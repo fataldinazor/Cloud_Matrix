@@ -4,21 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+     <link rel="stylesheet" href="/output.css">
 </head>
 <body class="bg-gray-100">
     <%- include("header.ejs") %>
 
     <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-semibold text-gray-800 mb-4">Users</h1>
-        <div class="userContainer bg-white p-6 rounded-lg shadow-md">
-            <ul class="list-disc ml-6 space-y-3">
+        <h1 class="text-4xl font-bold text-gray-900 mb-6 text-center">User Directory</h1>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Users</h2>
+
+            <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <% allUsers.forEach(user => { %>
-                    <li>
-                        <a href="/users/<%= user.id %>" class="text-blue-600 hover:text-blue-800 transition duration-200">
+                <li class="flex items-center space-x-4 bg-gray-50 hover:bg-gray-100 p-4 rounded-lg shadow-md transition duration-300">
+                    <!-- Avatar Placeholder -->
+                    <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl font-bold">
+                        <%= user.username.charAt(0).toUpperCase() %>
+                    </div>
+
+                    <div>
+                        <a href="/users/<%= user.id %>" class="text-lg font-semibold text-blue-600 hover:text-blue-800 transition duration-200">
                             <%= user.username %>
                         </a>
-                    </li>
+                        <p class="text-gray-600 text-sm">
+                            <%=user.fname%> <%=user.lname%>
+                        </p>
+                    </div>
+                </li>
                 <% }) %>
             </ul>
         </div>

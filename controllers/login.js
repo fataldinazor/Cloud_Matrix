@@ -38,13 +38,13 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// get login form
+// GET login form
 const loginGet = (req, res) => {
   if (req.user) {
     res.redirect(`/users/${req.user.id}`);
   } else {
     res.render("login", {
-      errors: [],
+      errors: req.flash('error'),
     });
   }
 };
@@ -54,6 +54,7 @@ const loginPost = (req, res, next) => {
   passport.authenticate("local", {
     successRedirect: `/users/`,
     failureRedirect: "/log-in",
+    failureFlash: true
   })(req, res, next);
 };
 

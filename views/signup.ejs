@@ -4,24 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign-Up</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/output.css">
   </head>
   <body class="bg-gray-100 h-screen flex flex-col">
     <%- include('header.ejs') %>
 
-    <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md my-auto mx-auto">
-      <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">User Sign-Up</h2>
-      <p>Already have an Account <a href="/log-in" class="text-blue-500">Log-in</a></p>
+    <div class="w-full max-w-md bg-white p-10 rounded-lg shadow-lg my-auto mx-auto border border-gray-200">
+      <h2 class="text-3xl font-extrabold mb-4 text-center text-gray-800">User Sign-Up</h2>
+      <p class="text-center text-gray-600">Already have an Account? <a href="/log-in" class="text-blue-500 hover:underline">Log-in</a></p>
 
-      <% if (errors && errors.length > 0) { %>
-        <ul class="bg-red-100 p-4 rounded mb-4 text-red-600">
-          <% errors.forEach(error => { %>
-            <li><%= error.msg %></li>
-          <% }) %>
-        </ul>
-      <% } %>
+      <%- include('errors.ejs') %>
 
-      <form action="/sign-up" method="POST" class="space-y-4">
+      <form action="/sign-up" method="POST" class="space-y-6">
         <div>
           <label for="fname" class="block text-sm font-medium text-gray-700">First Name</label>
           <input 
@@ -30,7 +24,7 @@
             name="fname" 
             placeholder="Enter your First Name"
             required 
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
           />
         </div>
 
@@ -41,7 +35,7 @@
             id="lname" 
             name="lname" 
             placeholder="Enter your Last Name"
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
           />
         </div>
 
@@ -53,7 +47,7 @@
             name="username" 
             placeholder="Create a Username"
             required 
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
           />
         </div>
 
@@ -65,7 +59,7 @@
             name="password" 
             placeholder="Create a new password"
             required 
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
           />
         </div>
 
@@ -77,13 +71,13 @@
             name="confirmPassword" 
             placeholder="Confirm your password"
             required 
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200"
           />
         </div>
 
         <button 
           type="submit" 
-          class="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 transition duration-300"
+          class="w-full bg-blue-600 text-white font-semibold py-3 rounded-md shadow-md hover:bg-blue-700 transition duration-300"
         >
           Submit
         </button>

@@ -1,6 +1,5 @@
 const prisma = require("./prisma");
 const { body, validationResult } = require("express-validator");
-// const { isUserAuthorized } = require("./folders");
 const cloudinary = require("../cloudinaryConfig.js");
 
 //using express-validator for folder duplication check
@@ -18,7 +17,6 @@ const uniqueFolderName = body("folderName").custom(async (value, { req }) => {
     }
     return true;
   } catch (error) {
-    console.log(error);
     throw new Error(error.message || "Sever Error");
   }
 });
@@ -84,7 +82,6 @@ const userGet = async (req, res) => {
 
 // CREATING a new Folder for user
 const userCreateFolderPost = [
-  // isUserAuthorized,
   uniqueFolderName,
   async (req, res) => {
     const errors = validationResult(req);
@@ -99,7 +96,7 @@ const userCreateFolderPost = [
 
     if (!errors.isEmpty()) {
       return res.status(400).render("user", {
-        user: user,
+        selected_user: user,
         folders: folders,
         errors: errors.array(),
       });
@@ -115,7 +112,7 @@ const userCreateFolderPost = [
         },
       });
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       res.status(400).send("Server Error");
     }
     res.redirect(`/users/${user_id}`);
@@ -124,7 +121,6 @@ const userCreateFolderPost = [
 
 //EDIT Folder name and visibility
 const editFolderPost=[
-  // isUserAuthorized,
   async(req, res)=>{
     const {user_id, folder_id} =req.params;
     let {folderName, visibility}= req.body;
@@ -144,7 +140,6 @@ const editFolderPost=[
 
 // DELETE a folder and the files inside it.
 const deleteFolderPost = [
-  // isUserAuthorized,
   async (req, res) => {
     const { user_id, folder_id } = req.params;
     let files_in_folder=await prisma.file.findMany({
@@ -154,9 +149,6 @@ const deleteFolderPost = [
     })
     // deleting all the files associated with the folder 
     // from cloudinary 
-    // files_in_folder.forEach(async file=>{
-    //   await cloudinary.uploader.destroy(file.public_id);
-    // })
     const deletePromises = files_in_folder.map((file)=>
       cloudinary.uploader.destroy(file.public_id)
     )

@@ -1,42 +1,34 @@
-<header
-  class="bg-gray-800 text-white py-4 px-6 flex justify-between items-center shadow-md"
->
-  <h2 class="text-2xl font-bold">Website Name</h2>
-  <ul class="flex space-x-6">
-    <% if(!user){ %>
-    <li>
-      <a
-        href="/sign-up"
-        class="text-white hover:text-gray-300 transition-colors duration-200"
-        >Sign-Up</a
-      >
-    </li>
-    <li>
-      <a
-        href="/log-in"
-        class="text-white hover:text-gray-300 transition-colors duration-200"
-        >Log-In</a
-      >
-    </li>
-    <% } else { %>
-    <li><%=user.username%></li>
-    <li>
-      <a  class="text-white hover:text-gray-300 transition-colors duration-200" href="/users">All Users</a>
-    </li>
-    <li>
-      <a
-        href="/users/<%=user.id%>"
-        class="text-white hover:text-gray-300 transition-colors duration-200"
-        >Your Folders</a
-      >
-    </li>
-    <li>
-      <a
-        href="/logout"
-        class="text-white hover:text-gray-300 transition-colors duration-200"
-        >Log-Out</a
-      >
-    </li>
-    <% } %>
-  </ul>
+<header class="bg-gradient-to-r from-blue-600 to-indigo-800 text-white py-4 shadow-lg">
+  <div class="container mx-auto flex justify-between items-center px-6">
+    <div class="flex items-center space-x-4">
+      <img src="/favicon.png" alt="CloudMatrix Logo" class="w-10 h-10" />
+      <h1 class="text-3xl font-bold tracking-wide">CloudMatrix</h1>
+    </div>
+    
+    <nav>
+      <ul class="flex space-x-6 font text-lg">
+        <% if (!user) { %>
+          <li>
+            <a href="/sign-up" class="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md transition duration-300">Sign Up</a>
+          </li>
+          <li>
+            <a href="/log-in" class="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md transition duration-300">Log In</a>
+          </li>
+        <% } else { %>
+          <li>
+            <span class="font-bold"><%= user.username %></span>
+          </li>
+          <li>
+            <a href="/users" class="hover:text-gray-300 transition duration-300">All Users</a>
+          </li>
+          <li>
+            <a href="/users/<%= user.id %>" class="hover:text-gray-300 transition duration-300">Your Folders</a>
+          </li>
+          <li>
+            <a href="/logout" class="text-red-300 hover:text-red-200 transition duration-300">Log Out</a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
 </header>

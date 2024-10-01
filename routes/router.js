@@ -25,7 +25,7 @@ router.get("/users/:user_id/:folder_id", folderController.getFolder);
 router.get("/users/:user_id/:folder_id/:file_id/download", folderController.downloadFile);
 
 // middleware used to authorize before any Create, Update, Delete operation
-router.use("/users/:user_id", securityController.authorizeUser );
+router.use("/users/:user_id", securityController.authorizeUser);
 
 //posts where user authorization is needed
 router.post("/users/:user_id/create-folder", usersController.userCreateFolderPost);
@@ -41,4 +41,5 @@ router.get("/logout", (req, res, next) => {
     res.redirect("/log-in");
   });
 });
+
 module.exports = router;
