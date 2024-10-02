@@ -42,4 +42,7 @@ router.get("/logout", (req, res, next) => {
   });
 });
 
+//for all the other routes redirect to users
+router.get("/*",(req, res)=> res.redirect("/users"));
+
 module.exports = router;
