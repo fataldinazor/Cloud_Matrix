@@ -2,6 +2,13 @@
 
 This is a backend application that allows users to sign up, log in, and upload files into folders. Users can manage their files, set folder visibility (public or private), and download or delete files. The application uses Express, Prisma ORM, Passport.js for authentication, bcrypt.js for password encryption, and Cloudinary for file storage.
 
+## How to Run the application
+- Clone the repository -> git clone https://github.com/fataldinazor/File_Uploader.git
+- cd File_Uploader
+- npm install
+- npx prisma migrate dev
+- nodemon app.js
+
 ## Features
 
 ### 1. **Sign-Up**
@@ -54,3 +61,14 @@ This is a backend application that allows users to sign up, log in, and upload f
 ## Future Scope
 - **File Sharing**: Implement the ability to share files via a link that expires after a certain period.
 - **Bulk File Upload**: Enable users to upload multiple files simultaneously.
+
+## Technologies Used
+- **Node.js**: Backend framework
+- **Express.js**: Web framework for Node.js
+- **Prisma ORM**: Database ORM to interact with PostgreSQL
+- **Passport.js**: Authentication middleware for sessions
+- **bcrypt.js**: Password hashing
+- **Multer**: File upload handling
+- **Cloudinary**: Cloud storage for user files
+- **TailwindCSS**: For styling
+- **Express Validator**: For form validation and sanitization
