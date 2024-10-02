@@ -2,10 +2,12 @@ const express = require("express");
 const session = require("express-session");
 const passport = require("passport");
 const path = require("path");
-require("dotenv").config({
-  override: true,
-  path: "./.env",
-});
+const dotenv = require("dotenv");
+const envFile =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
+dotenv.config({ path: envFile });
 const PORT = process.env.PORT;
 const router = require("./routes/router");
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
